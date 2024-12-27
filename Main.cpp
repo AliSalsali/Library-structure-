@@ -1,203 +1,77 @@
 #include <iostream>
-#include <stdlib.h>
+#include <cstdlib>
 #include <string>
-#include <windows.h>
+// #include <windows.h>
 #include <fstream>
-#include <sstream>   
+#include <sstream>
 #include <ctime>
-using namespace std ;
 
+using namespace std;
 
-void inter_book();
-void signup();
-void pick_up_book();
-void give_back_book();
-void first_choise_f(int x);
-void insrt_the_file_to_struct();
-void eraseFileLine(int x) ;
-void save_in_file();
+// Function declarations
+void addBook();
+void registerMember();
+void borrowBook();
+void returnBook();
+void processUserChoice(int choice);
+void validateUserChoice(int choice);
+void loadDataFromFile();
+void removeBorrowRecord(int index);
+void saveDataToFile();
 
-
-struct books {
-    string name_book ,nevisande ,motargem_moalef, id_book ;
-    int   tedad_total , tedad_now ;
-};
-struct members {
-    string name, last_name ,cod_meli ,shomare_telephone  ;
-    int tedad_ketab_amanat = 0 ;
-};
-struct amanat {
-    string code_meli ,id_book_amant ;  
-};
-struct count {
-    int b = 0 , a  = 0, m  = 0; 
+// Struct definitions
+struct Book {
+    string title;
+    string author;
+    string translator;
+    string id;
+    int totalCopies;
+    int availableCopies;
 };
 
-struct books b[10];
-struct members m[10];
-struct amanat a[10];
-struct count c;
+struct Member {
+    string firstName;
+    string lastName;
+    string nationalCode;
+    string phoneNumber;
+    int borrowedBooksCount = 0;
+};
 
-void main()
-{
-    insrt_the_file_to_struct();
-    cout <<"hipppss";
-    system("cls");
-    int first_choise;
-    cout << "Welcome to librery \n 1- inter abook \n 2- suinup \n 3- pick up a book \n 4- give back a book \n 5- update tedad ketab \n";
-    cin >> first_choise ;
-    first_choise_f(first_choise);
-    save_in_file();
-    
-}
+struct BorrowRecord {
+    string nationalCode;
+    string bookId;
+};
 
-void insrt_the_file_to_struct()
-{
-    string line ;
-    int counter = 0 ;
+struct RecordCount {
+    int books = 0;
+    int members = 0;
+    int borrowRecords = 0;
+};
 
-    fstream books_file;
-    books_file.open("books.txt" ,  ios::in);
-    for (int i = 0 ; getline(books_file, line) ; i++)
-    {
-        counter ++ ;
-        istringstream iss(line);
-        iss >> b[i].name_book  >> b[i].nevisande >> b[i].motargem_moalef >> b[i].tedad_now >> b[i].id_book >> b[i].tedad_total ;  ;
-    }
-    c.b = counter ;
-    counter = 0;
-    books_file.close();
+// Global variables
+Book books[10];
+Member members[10];
+BorrowRecord borrowRecords[10];
+RecordCount recordCount;
 
-    fstream user_file;
-    user_file.open("user.txt" ,  ios::in);
-    for (int i = 0 ; getline(user_file, line) ; i++)
-    {
-        counter ++ ;
-        istringstream iss(line);
-        iss >> m[i].name  >> m[i].last_name >> m[i].cod_meli >> m[i].shomare_telephone >> m[i].tedad_ketab_amanat  ;
-    }
-    c.m = counter ;
-    counter = 0;
-    user_file.close();
+// Main function
+int main() {
+    loadDataFromFile();
+    int userChoice;
 
-    fstream amanat_file;
-    amanat_file.open("amanat.txt" ,  ios::in);
-    for (int i = 0 ; getline(amanat_file, line) ; i++)
-    {
-        counter ++ ;
-        istringstream iss(line);
-        iss >> a[i].code_meli  >> a[i].id_book_amant ;
-    }
-    c.a = counter ;
-    amanat_file.close();
-}
+    cout << "Welcome to the Library System\n";
+    cout << "1- Add a Book\n";
+    cout << "2- Register a Member\n";
+    cout << "3- Borrow a Book\n";
+    cout << "4- Return a Book\n";
+    cout << "5- Exit\n";
+    cin >> userChoice;
 
-void eraseFileLine(int x)
-{
-    for (int i = 0; i < (c.a)-1 ; i++)
-    {
-        
-        if (x == i)
-        {
-            a[i].code_meli = a[i+1].code_meli;
-            a[i].id_book_amant = a[i+1].id_book_amant;
-        }
-        
-    }
-    c.a -- ;
-}
+    validateUserChoice(userChoice);
+    processUserChoice(userChoice);
+    saveDataToFile();
 
-void give_back_book()
-{
-    system("cls"); 
-    string  inter_id_book , inter_cod_meli ;
-    bool find =false ;
-    cout << "inter the id book  :" ;
-    cin >> inter_id_book ;
-    cout << "inter the codemeli  :" ;
-    cin >> inter_cod_meli ;
-
-    for (int i = 0; i < c.a; i++)
-    {
-        if (inter_id_book == a[i].id_book_amant && inter_cod_meli == a[i].code_meli)
-        {
-            eraseFileLine(i);
-            find = true ;
-            cout << " pas gerefte shod ";
-        }
-        
-    }
-    if (find)
-    {
-        for (int i = 0; i < c.b; i++)
-        {
-            if (inter_id_book == b[i].id_book)
-            {
-                b[i].tedad_now ++ ;
-            }
-            
-        }
-        for (int i = 0; i < c.m; i++)
-        {
-            if (inter_cod_meli == m[i].cod_meli)
-            {
-                m[i].tedad_ketab_amanat-- ;
-            }
-            
-        }        
-    }else cout << "chenin mosha khasati vogod nadarad" ;
-    
-}
-
-void pick_up_book()
-{
-    system("cls"); 
-    string  inter_id_book ,  inter_cod_meli  ;
-    int line_b ,line_m ;
-    bool book=false , member=false ;
-
-    // time_t now = time(0);
-    // char* dt = ctime(&now);
-
-    cout << "inter the id book  :" ;
-    cin >> inter_id_book ;
-
-    cout << "inter the codemeli  :" ;
-    cin >> inter_cod_meli ;
-
-    for (int i = 0; i < c.b; i++)
-    {
-        if ( inter_id_book == b[i].id_book )
-        {
-            book = true ;
-            line_b = i; 
-        }
-        
-    }
-
-
-    for (int i = 0; i < c.m; i++)
-    {
-        if ( (m[i].cod_meli == inter_cod_meli )&& m[i].tedad_ketab_amanat < 3 )
-        {
-            member = true ;
-            line_m = i ;
-        }
-        
-    }
-    
-    
-    if (member && book )
-    {
-        a[c.a].code_meli = inter_cod_meli ;
-        a[c.a].id_book_amant =inter_id_book;
-        c.a ++ ;
-        b[line_b].tedad_now -- ;
-        m[line_m].tedad_ketab_amanat++ ;
-        cout << "Done !!";
-    }else cout << "chenin mosh khasati vogod nadarad" ;
-    
-
+    return 0;
 }
 
 string removeSpace(string& str)
@@ -210,136 +84,281 @@ string removeSpace(string& str)
     return str;
 }
 
-void inter_book()
-{
-    system("cls"); 
-    string name, nevisande ,motargem_moalef , id_book ;
-    int tedad ;
-
-    cout << "Enter a name: ";
-    getline(cin >> ws, name); 
-    removeSpace(name);
-
-    cout << "Enter a nevisande: ";
-    getline(cin >> ws, nevisande); 
-    removeSpace(nevisande);
-
-    cout << "Enter a motargem_moalef: ";
-    getline(cin >> ws, motargem_moalef); 
-    removeSpace(motargem_moalef);
-
-    cout << "Enter a tedad: ";
-    cin >> tedad ;
-    cout << "Enter a id_book: ";
-    cin >> id_book ;
-
-    for (int i = 0; i < c.b; i++)
-    {
-        if (id_book == b[i].id_book)
-        {
-            cout << "this book wase rigester";
-            exit(0);
-        }
-        
-    }
-
-    b[c.b].name_book = name;
-    b[c.b].nevisande = nevisande;
-    b[c.b].motargem_moalef = motargem_moalef;
-    b[c.b].tedad_total = tedad;
-    b[c.b].tedad_now = tedad ;
-    b[c.b].id_book =id_book;
-    c.b ++ ;
-    cout << "Done!!";
-}    
-
-void signup()
-{
-    system("cls"); 
-    string name, last_name ,cod_meli ,shomare_telephone ;
-
-    cout << "Enter a name: ";
-    getline(cin >> ws, name); 
-    removeSpace(name);
-
-    cout << "Enter a last_name: ";
-    getline(cin >> ws, last_name); 
-    removeSpace(last_name);
-
-    cout << "Enter a cod_meli: ";
-    cin >> cod_meli ;
-
-    cout << "Enter a shomare_telephone: ";
-    cin >> shomare_telephone ;
-
-
-    for (int i = 0; i < c.m; i++)
-    {
-        if (cod_meli == m[i].cod_meli)
-        {
-            cout << "this user wase rigester";
-            exit(0);
-        }
-        
-    }
-
-    m[c.m].cod_meli=cod_meli;
-    m[c.m].name=name;
-    m[c.m].last_name=last_name;
-    m[c.m].shomare_telephone=shomare_telephone;
-    m[c.m].tedad_ketab_amanat = 0 ;
-    c.m ++ ;
-    cout << "Done!!";
-}
-
-void save_in_file()
-{
-    fstream books_file;
-    books_file.open("books.txt");
-    for (int i = 0 ; i < c.b ; i++)
-    {
-        books_file <<  b[i].name_book << "\t" << b[i].nevisande <<"\t" <<  b[i].motargem_moalef <<"\t" << b[i].tedad_now<<"\t" << b[i].id_book <<"\t" << b[i].tedad_total << endl ;
-    }
-    books_file.close();
-
-    fstream user_file;
-    user_file.open("user.txt");
-    for (int i = 0 ; i < c.m ; i++)
-    {
-        user_file <<  m[i].name << "\t" << m[i].last_name << "\t" << m[i].cod_meli << "\t" << m[i].shomare_telephone << "\t" << m[i].tedad_ketab_amanat << endl ;
-    }
-    user_file.close();
-    
-    fstream amanat_file;
-    amanat_file.open("amanat.txt" , ios::out );
-    for (int i = 0 ; i<c.a ; i++)
-    {
-        amanat_file << a[i].code_meli <<"\t"<< a[i].id_book_amant <<endl ;
-    }
-    amanat_file.close();
-}
-
-void first_choise_f(int x)
-{
-    system("cls"); 
-    switch (x)
-    {
-    case 1 :
-        inter_book();
-        break;
-    case 2 :
-        signup();
-        break;  
-    case 3 :
-        pick_up_book();
-        break;
-    case 4 :
-        give_back_book();
-        break;
-    case 5 :
-        break;                        
-    default:
+void validateUserChoice(int choice) {
+    if (choice < 1 || choice > 5) {
+        cout << "Invalid choice. Please select a valid option.\n";
         main();
-        break;
+    }
+}
+
+void loadDataFromFile() {
+    string line;
+
+    // Load books data
+    ifstream bookFile("books.txt");
+    if (!bookFile) {
+        cerr << "Error: Could not open books.txt\n";
+        return;
+    }
+    int bookCounter = 0;
+    while (getline(bookFile, line)) {
+        istringstream iss(line);
+        if (!(iss >> books[bookCounter].title >> books[bookCounter].author >> books[bookCounter].translator
+              >> books[bookCounter].availableCopies >> books[bookCounter].id >> books[bookCounter].totalCopies)) {
+            cerr << "Error: Invalid format in books.txt\n";
+            continue;
+        }
+        bookCounter++;
+    }
+    recordCount.books = bookCounter;
+    bookFile.close();
+
+    // Load members data
+    ifstream memberFile("members.txt");
+    if (!memberFile) {
+        cerr << "Error: Could not open members.txt\n";
+        return;
+    }
+    int memberCounter = 0;
+    while (getline(memberFile, line)) {
+        istringstream iss(line);
+        if (!(iss >> members[memberCounter].firstName >> members[memberCounter].lastName
+              >> members[memberCounter].nationalCode >> members[memberCounter].phoneNumber
+              >> members[memberCounter].borrowedBooksCount)) {
+            cerr << "Error: Invalid format in members.txt\n";
+            continue;
+        }
+        memberCounter++;
+    }
+    recordCount.members = memberCounter;
+    memberFile.close();
+
+    // Load borrow records data
+    ifstream borrowFile("borrow_records.txt");
+    if (!borrowFile) {
+        cerr << "Error: Could not open borrow_records.txt\n";
+        return;
+    }
+    int borrowCounter = 0;
+    while (getline(borrowFile, line)) {
+        istringstream iss(line);
+        if (!(iss >> borrowRecords[borrowCounter].nationalCode >> borrowRecords[borrowCounter].bookId)) {
+            cerr << "Error: Invalid format in borrow_records.txt\n";
+            continue;
+        }
+        borrowCounter++;
+    }
+    recordCount.borrowRecords = borrowCounter;
+    borrowFile.close();
+}
+
+void saveDataToFile() {
+    // Save books data
+    ofstream bookFile("books.txt");
+    if (!bookFile) {
+        cerr << "Error: Could not open books.txt for writing\n";
+        return;
+    }
+    for (int i = 0; i < recordCount.books; i++) {
+        bookFile << books[i].title << "\t" << books[i].author << "\t" << books[i].translator
+                 << "\t" << books[i].availableCopies << "\t" << books[i].id << "\t" << books[i].totalCopies << endl;
+    }
+    bookFile.close();
+
+    // Save members data
+    ofstream memberFile("members.txt");
+    if (!memberFile) {
+        cerr << "Error: Could not open members.txt for writing\n";
+        return;
+    }
+    for (int i = 0; i < recordCount.members; i++) {
+        memberFile << members[i].firstName << "\t" << members[i].lastName << "\t"
+                   << members[i].nationalCode << "\t" << members[i].phoneNumber << "\t"
+                   << members[i].borrowedBooksCount << endl;
+    }
+    memberFile.close();
+
+    // Save borrow records data
+    ofstream borrowFile("borrow_records.txt");
+    if (!borrowFile) {
+        cerr << "Error: Could not open borrow_records.txt for writing\n";
+        return;
+    }
+    for (int i = 0; i < recordCount.borrowRecords; i++) {
+        borrowFile << borrowRecords[i].nationalCode << "\t" << borrowRecords[i].bookId << endl;
+    }
+    borrowFile.close();
+}
+
+void addBook() {
+    system("cls");
+    string title, author, translator, id;
+    int totalCopies;
+
+    cout << "Enter book title: ";
+    getline(cin >> ws, title);
+    removeSpace(title);
+    cout << "Enter author: ";
+    getline(cin >> ws, author);
+    removeSpace(author);
+    cout << "Enter translator: ";
+    getline(cin >> ws, translator);
+    removeSpace(translator);
+    cout << "Enter total copies: ";
+    cin >> totalCopies;
+    cout << "Enter book ID: ";
+    cin >> id;
+
+    for (int i = 0; i < recordCount.books; i++) {
+        if (id == books[i].id) {
+            cout << "This book is already registered.\n";
+            return;
+        }
+    }
+
+    books[recordCount.books].title = title;
+    books[recordCount.books].author = author;
+    books[recordCount.books].translator = translator;
+    books[recordCount.books].totalCopies = totalCopies;
+    books[recordCount.books].availableCopies = totalCopies;
+    books[recordCount.books].id = id;
+    recordCount.books++;
+    cout << "Book added successfully!\n";
+}
+
+void registerMember() {
+    system("cls");
+    string firstName, lastName, nationalCode, phoneNumber;
+
+    cout << "Enter first name: ";
+    getline(cin >> ws, firstName);
+    removeSpace(firstName);
+    cout << "Enter last name: ";
+    getline(cin >> ws, lastName);
+    removeSpace(lastName);
+    cout << "Enter national code: ";
+    cin >> nationalCode;
+    cout << "Enter phone number: ";
+    cin >> phoneNumber;
+
+    for (int i = 0; i < recordCount.members; i++) {
+        if (nationalCode == members[i].nationalCode) {
+            cout << "This member is already registered.\n";
+            return;
+        }
+    }
+
+    members[recordCount.members].firstName = firstName;
+    members[recordCount.members].lastName = lastName;
+    members[recordCount.members].nationalCode = nationalCode;
+    members[recordCount.members].phoneNumber = phoneNumber;
+    recordCount.members++;
+    cout << "Member registered successfully!\n";
+}
+
+void borrowBook() {
+    system("cls");
+    string bookId, nationalCode;
+    int bookIndex = -1, memberIndex = -1;
+
+    cout << "Enter book ID: ";
+    cin >> bookId;
+    cout << "Enter member national code: ";
+    cin >> nationalCode;
+
+    for (int i = 0; i < recordCount.books; i++) {
+        if (books[i].id == bookId && books[i].availableCopies > 0) {
+            bookIndex = i;
+            break;
+        }
+    }
+
+    for (int i = 0; i < recordCount.members; i++) {
+        if (members[i].nationalCode == nationalCode && members[i].borrowedBooksCount < 3) {
+            memberIndex = i;
+            break;
+        }
+    }
+
+    if (bookIndex != -1 && memberIndex != -1) {
+        borrowRecords[recordCount.borrowRecords].nationalCode = nationalCode;
+        borrowRecords[recordCount.borrowRecords].bookId = bookId;
+        recordCount.borrowRecords++;
+        books[bookIndex].availableCopies--;
+        members[memberIndex].borrowedBooksCount++;
+        cout << "Book borrowed successfully!\n";
+    } else {
+        cout << "Invalid book ID or member eligibility.\n";
+    }
+}
+
+void returnBook() {
+    system("cls");
+    string bookId, nationalCode;
+    bool found = false;
+
+    cout << "Enter book ID: ";
+    cin >> bookId;
+    cout << "Enter member national code: ";
+    cin >> nationalCode;
+
+    for (int i = 0; i < recordCount.borrowRecords; i++) {
+        if (borrowRecords[i].bookId == bookId && borrowRecords[i].nationalCode == nationalCode) {
+            removeBorrowRecord(i);
+            found = true;
+            break;
+        }
+    }
+
+    if (found) {
+        for (int i = 0; i < recordCount.books; i++) {
+            if (books[i].id == bookId) {
+                books[i].availableCopies++;
+                break;
+            }
+        }
+
+        for (int i = 0; i < recordCount.members; i++) {
+            if (members[i].nationalCode == nationalCode) {
+                members[i].borrowedBooksCount--;
+                break;
+            }
+        }
+
+        cout << "Book returned successfully!\n";
+    } else {
+        cout << "No matching borrow record found.\n";
+    }
+}
+
+void removeBorrowRecord(int index) {
+    for (int i = index; i < recordCount.borrowRecords - 1; i++) {
+        borrowRecords[i] = borrowRecords[i + 1];
+    }
+    recordCount.borrowRecords--;
+}
+
+void processUserChoice(int choice) {
+    system("cls");
+    switch (choice) {
+        case 1:
+            addBook();
+            break;
+        case 2:
+            registerMember();
+            break;
+        case 3:
+            borrowBook();
+            break;
+        case 4:
+            returnBook();
+            break;
+        case 5:
+            cout << "Goodbye!\n";
+            exit(0);
+        default:
+            cout << "Invalid choice.\n";
+            main();
+            break;
     }
 }
