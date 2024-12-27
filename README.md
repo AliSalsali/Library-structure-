@@ -60,15 +60,15 @@ Each line represents a borrowing record:
 1. Clone the repository:
    ```bash
    https://github.com/AliSalsali/Library-structure-.git
-   cd Library-structure
+   cd Library-structure-
    ```
 2. Compile the code using a C++ compiler:
    ```bash
-   g++ -o Library-structure Library-structure.cpp
+   g++ -o Library-structure- Library-structure-.cpp
    ```
 3. Run the program:
    ```bash
-   ./Library-structure
+   ./Library-structure-
    ```
 4. Follow the on-screen instructions to manage the library.
 
